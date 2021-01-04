@@ -31,11 +31,10 @@
 	 testFiles in test/resources contains test files
 	 zip  in test/resources contains zipped files
 	 unzip  in test/resources contains unzipped files
+    View test results :  After build jacoco report will be available in /build/reports/
 	 
  - **Run** :  
  **-To compress** ./gradlew run --args='compress inputdirPath outputdirPath maxCompressFileSizeInMB(Integer) '
   *Example* : ./gradlew run --args='compress src/test/resources/testFiles/ src/test/resources/zip/ 2'
   **-To decompress** ./gradlew run --args='decompress inputdirPath outputdirPath'
   *Example* : ./gradlew run --args='compress src/test/resources/zip/ src/test/resources/unzip/'
-  
-	  
