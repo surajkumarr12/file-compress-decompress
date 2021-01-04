@@ -1,0 +1,111 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'jacoco'
+}
+
+application {
+    mainClassName = 'com.agoda.common.Main'
+}
+
+group 'com.agoda'
+version '1.0'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+    testImplementation('org.junit.jupiter:junit-jupiter:5.5.2')
+    testImplementation 'org.junit.platform:junit-platform-commons:1.5.2'
+    testCompile group: 'org.powermock', name: 'powermock-api-mockito2', version: '1.7.4'
+    testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: '1.7.4'
+    compile 'org.slf4j:slf4j-api:1.7.24'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version:  '1.1.7'
+}
+
+jar {
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': 'com.agoda.common.Main'
+    }
+}
+
+sourceSets {
+    intTest {
+        java {
+            compileClasspath += sourceSets.main.output
+            runtimeClasspath += sourceSets.main.output
+            srcDir file('src/integration-tests/java')
+            resources.srcDir file('src/test/resources')
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java/com/agoda/common/helper"]
+        }
+    }
+}
+configurations {
+    intTestImplementation.extendsFrom implementation
+    intTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+test {
+    useJUnit()
+    finalizedBy jacocoTestReport
+}
+
+task integrationTest(type: Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.intTest.output.classesDirs
+    classpath = sourceSets.intTest.runtimeClasspath
+    shouldRunAfter test
+    finalizedBy jacocoTestReport
+}
+
+check.dependsOn integrationTest
+
+integrationTest {
+    useJUnitPlatform()
+}
+
+jacoco{
+    toolVersion = '0.8.2'
+}
+
+
+jacocoTestReport {
+    sourceSets sourceSets.main
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+}
+
+jacocoTestCoverageVerification {
+    sourceSets sourceSets.main
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.7
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestCoverageVerification.mustRunAfter jacocoTestReport
+
+
+
+
+
+
